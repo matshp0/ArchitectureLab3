@@ -1,9 +1,9 @@
-module github.com/roman-mazur/architecture-lab-3
+module github.com/matshp0/ArchitectureLab3
 
 go 1.24
 
 require (
-	golang.org/x/exp/shiny v0.0.0-20250305212735-054e65f0b394
+	golang.org/x/exp/shiny v0.0.0-20250408133849-7e4ce0ab07d0
 	golang.org/x/image v0.25.0
 	golang.org/x/mobile v0.0.0-20250305212854-3a7bc9f8a4de
 )
