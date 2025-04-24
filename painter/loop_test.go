@@ -26,7 +26,6 @@ func TestLoop_ConcurrentOperations(t *testing.T) {
 
 	l.Start(mockScreen{})
 
-	// Post multiple operations concurrently
 	var opsExecuted int
 	for i := 0; i < 10; i++ {
 		go func() {
@@ -36,7 +35,6 @@ func TestLoop_ConcurrentOperations(t *testing.T) {
 		}()
 	}
 
-	// Give time for operations to process
 	time.Sleep(100 * time.Millisecond)
 	l.StopAndWait()
 
@@ -87,8 +85,6 @@ func TestLoop_MultipleUpdates(t *testing.T) {
 		t.Error("Second color should be green")
 	}
 }
-
-// Update mockTexture to track release
 
 func TestLoop_EmptyQueue(t *testing.T) {
 	l := NewLoop()

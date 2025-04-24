@@ -7,8 +7,6 @@ import (
 	"image/color"
 )
 
-// --- Types ---
-
 type Operation interface {
 	Do(t screen.Texture) bool
 }
@@ -33,8 +31,6 @@ func (f Command) Do(t screen.Texture) bool {
 
 var UpdateOp = updateOp{}
 
-// --- Global State ---
-
 type Figure struct {
 	RelX, RelY float32
 }
@@ -48,8 +44,6 @@ type State struct {
 var GlobalState = &State{
 	BackgroundColor: color.Black,
 }
-
-// --- Helper Functions ---
 
 func relToAbs(v float32, max int) int {
 	return int(v * float32(max))
@@ -71,8 +65,6 @@ func drawBGRect(t screen.Texture) {
 		t.Fill(*GlobalState.BGRect, color.Black, screen.Src)
 	}
 }
-
-// --- Operations ---
 
 var WhiteFill OperationFunc = func(t screen.Texture, options map[string]float32) {
 	t.Fill(t.Bounds(), color.White, screen.Src)
