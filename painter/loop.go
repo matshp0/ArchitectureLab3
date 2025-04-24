@@ -1,6 +1,7 @@
 package painter
 
 import (
+	"fmt"
 	"image"
 
 	"golang.org/x/exp/shiny/screen"
@@ -10,6 +11,10 @@ import (
 type Receiver interface {
 	Update(t screen.Texture)
 }
+
+type message interface{}
+
+type closeSignal struct{}
 
 // Loop реалізує цикл подій для формування текстури отриманої через виконання операцій отриманих з внутрішньої черги.
 type Loop struct {
@@ -24,37 +29,73 @@ type Loop struct {
 	stopReq bool
 }
 
-var size = image.Pt(400, 400)
+func NewLoop() *Loop {
+	return &Loop{
+		mq:   newMq(),
+		stop: make(chan struct{}),
+	}
+}
+
+var size = image.Pt(800, 800)
 
 // Start запускає цикл подій. Цей метод потрібно запустити до того, як викликати на ньому будь-які інші методи.
 func (l *Loop) Start(s screen.Screen) {
-	l.next, _ = s.NewTexture(size)
-	l.prev, _ = s.NewTexture(size)
+	go func() {
+		defer close(l.stop)
+		var err error
+		l.next, err = s.NewTexture(size)
+		if err != nil {
+			panic("failed to create texture: " + err.Error())
+		}
+		defer l.next.Release()
 
-	// TODO: стартувати цикл подій.
+		for {
+			msg := l.mq.pull()
+
+			switch m := msg.(type) {
+
+			case updateOp:
+				fmt.Println("UPDATE: ", msg)
+				l.Receiver.Update(l.next)
+				l.prev = l.next
+
+			case Command:
+				fmt.Println("OPERATION: ", msg)
+				m.Do(l.next)
+
+			case closeSignal:
+				return
+
+			default:
+				fmt.Println("default", m)
+			}
+		}
+	}()
 }
 
 // Post додає нову операцію у внутрішню чергу.
 func (l *Loop) Post(op Operation) {
-	if update := op.Do(l.next); update {
-		l.Receiver.Update(l.next)
-		l.next, l.prev = l.prev, l.next
-	}
+	l.mq.push(op)
 }
 
 // StopAndWait сигналізує про необхідність завершити цикл та блокується до моменту його повної зупинки.
 func (l *Loop) StopAndWait() {
+	l.mq.push(closeSignal{})
+	<-l.stop
 }
 
-// TODO: Реалізувати чергу подій.
-type messageQueue struct{}
-
-func (mq *messageQueue) push(op Operation) {}
-
-func (mq *messageQueue) pull() Operation {
-	return nil
+type messageQueue struct {
+	ch chan message
 }
 
-func (mq *messageQueue) empty() bool {
-	return false
+func newMq() messageQueue {
+	return messageQueue{ch: make(chan message, 64)}
+}
+
+func (mq *messageQueue) push(m message) {
+	mq.ch <- m
+}
+
+func (mq *messageQueue) pull() message {
+	return <-mq.ch
 }

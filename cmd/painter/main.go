@@ -13,11 +13,11 @@ func main() {
 		pv ui.Visualizer // Візуалізатор створює вікно та малює у ньому.
 
 		// Потрібні для частини 2.
-		opLoop painter.Loop // Цикл обробки команд.
-		parser lang.Parser  // Парсер команд.
+		opLoop = *painter.NewLoop()
+		parser lang.Parser // Парсер команд.
 	)
 
-	//pv.Debug = true
+	pv.Debug = false
 	pv.Title = "Simple painter"
 
 	pv.OnScreenReady = opLoop.Start

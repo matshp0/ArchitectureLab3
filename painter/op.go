@@ -1,9 +1,9 @@
 package painter
 
 import (
-	"image/color"
-
+	"github.com/matshp0/ArchitectureLab3/ui"
 	"golang.org/x/exp/shiny/screen"
+	"image/color"
 )
 
 // Operation змінює вхідну текстуру.
@@ -12,37 +12,33 @@ type Operation interface {
 	Do(t screen.Texture) (ready bool)
 }
 
-// OperationList групує список операції в одну.
-type OperationList []Operation
-
-func (ol OperationList) Do(t screen.Texture) (ready bool) {
-	for _, o := range ol {
-		ready = o.Do(t) || ready
-	}
-	return
-}
-
 // UpdateOp операція, яка не змінює текстуру, але сигналізує, що текстуру потрібно розглядати як готову.
 var UpdateOp = updateOp{}
 
+type Command struct {
+	F       OperationFunc
+	Options map[string]float32
+}
 type updateOp struct{}
 
-func (op updateOp) Do(t screen.Texture) bool { return true }
+// OperationFunc використовується для перетворення `функції оновлення текстури в Operation.
+type OperationFunc func(t screen.Texture, options map[string]float32)
 
-// OperationFunc використовується для перетворення функції оновлення текстури в Operation.
-type OperationFunc func(t screen.Texture)
-
-func (f OperationFunc) Do(t screen.Texture) bool {
-	f(t)
+func (f updateOp) Do(t screen.Texture) bool {
 	return false
 }
 
-// WhiteFill зафарбовує тестуру у білий колір. Може бути викоистана як Operation через OperationFunc(WhiteFill).
-func WhiteFill(t screen.Texture) {
+func (f Command) Do(t screen.Texture) bool {
+	f.F(t, f.Options)
+	return false
+}
+
+// WhiteFill WhiteFill зафарбовує текстуру у білий колір. Може бути використана як Operation через OperationFunc(WhiteFill).
+var WhiteFill OperationFunc = func(t screen.Texture, options map[string]float32) {
 	t.Fill(t.Bounds(), color.White, screen.Src)
 }
 
-// GreenFill зафарбовує тестуру у зелений колір. Може бути викоистана як Operation через OperationFunc(GreenFill).
-func GreenFill(t screen.Texture) {
-	t.Fill(t.Bounds(), color.RGBA{G: 0xff, A: 0xff}, screen.Src)
+// GreenFill зафарбовує текстуру у зелений колір. Може бути використана як Operation через OperationFunc(GreenFill).
+var GreenFill OperationFunc = func(t screen.Texture, options map[string]float32) {
+	t.Fill(t.Bounds(), ui.Green, screen.Src)
 }

@@ -141,7 +141,6 @@ func (pw *Visualizer) handleEvent(e any, t screen.Texture) {
 		if t == nil {
 			pw.drawDefaultUI()
 		} else {
-			println(t)
 			pw.w.Scale(pw.sz.Bounds(), t, t.Bounds(), draw.Src, nil)
 		}
 		pw.w.Publish()

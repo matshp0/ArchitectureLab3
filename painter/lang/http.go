@@ -1,6 +1,7 @@
 package lang
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -24,8 +25,10 @@ func HttpHandler(loop *painter.Loop, p *Parser) http.Handler {
 			rw.WriteHeader(http.StatusBadRequest)
 			return
 		}
-
-		loop.Post(painter.OperationList(cmds))
+		for _, op := range cmds {
+			fmt.Println(op)
+			loop.Post(op)
+		}
 		rw.WriteHeader(http.StatusOK)
 	})
 }
