@@ -1,7 +1,6 @@
 package painter
 
 import (
-	"fmt"
 	"image"
 
 	"golang.org/x/exp/shiny/screen"
@@ -55,19 +54,14 @@ func (l *Loop) Start(s screen.Screen) {
 			switch m := msg.(type) {
 
 			case updateOp:
-				fmt.Println("UPDATE: ", msg)
 				l.Receiver.Update(l.next)
 				l.prev = l.next
 
 			case Command:
-				fmt.Println("OPERATION: ", msg)
 				m.Do(l.next)
 
 			case closeSignal:
 				return
-
-			default:
-				fmt.Println("default", m)
 			}
 		}
 	}()
